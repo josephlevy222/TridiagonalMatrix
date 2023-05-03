@@ -50,7 +50,7 @@ func aXpY<T: AlgebraicField>(A: TridiagonalMatrix<T>, x: ColumnVector<T>, y: Col
     return b
 }
 
-class TridiagonalLUMatrix<T: AlgebraicField> {
+struct TridiagonalLUMatrix<T: AlgebraicField> {
     var au0 : [T]
     var au1 : [T]
     var au2 : [T]
@@ -81,8 +81,8 @@ class TridiagonalLUMatrix<T: AlgebraicField> {
                     i = k+1
                 }
             }
-            indx[k] = i
-            if au0max == 0 { singular = true }  // want au0[k]=tiny
+            indx[k] = i+1
+            if au0max == 0 { singular = true; print("singular") }  // want au0[k]=tiny
             if i != k {
                 d.toggle()
                 au0.swapAt(k, i)
@@ -90,7 +90,7 @@ class TridiagonalLUMatrix<T: AlgebraicField> {
                 au2.swapAt(k, i)
             }
             if k<n-1 { //for i in k+1..<el { // i is k+1 el is k+1 or k if k+1 is n-1
-                al[k] = singular && au0[k]==T.zero ? T.zero : au0[k+1]/au0[k] // fixed for singular
+                al[k] = singular && au0[k]==T.zero ? T.zero : au0[k+1]/au0[k] // fixed for singular (maybe?)
                 au0[k+1] = au1[k+1] - al[k] * au1[k]
                 au1[k+1] = au2[k+1] - al[k] * au2[k]
                 au2[k+1] = T.zero
@@ -101,8 +101,8 @@ class TridiagonalLUMatrix<T: AlgebraicField> {
     func solveInPlace(_ x: inout ColumnVector<T>) {
         let n = au0.count
         for k in 0..<n {
-            x.swapAt(k, indx[k])
-            if k<n-1 { x[k+1] = al[k]*x[k] }
+            x.swapAt(k, indx[k]-1)
+            if k<n-1 { x[k+1] -= al[k]*x[k] }
         }
         x[n-1] = x[n-1]/au0[n-1]
         if n==1 {return}
