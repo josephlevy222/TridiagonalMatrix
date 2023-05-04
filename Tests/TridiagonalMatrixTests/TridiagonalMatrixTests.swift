@@ -1,21 +1,23 @@
 import XCTest
 @testable import TridiagonalMatrix
-
+import Numerics
 final class TridiagonalMatrixTests: XCTestCase {
     func testExample() throws {
         // This is an example of a functional test case.
         // Use XCTAssert and related functions to verify your tests produce the correct
         // results.
-        let lower = [-1.0,-1.0,-1.0,-1.0]
+        let one = Complex<Double>(1.0,0.0)
+        let d = Complex<Double>(1.732,0.0)
+        let lower = [-one,-one,-one,-one]
         let upper = lower
-        let diagonal = [2.0,2.0,2.0,2.0,2.0]
+        let diagonal = [d,d,d,d,d]
         let tridiag = TridiagonalMatrix(diagonal: diagonal, upper: upper, lower: lower)
         let tridiagLU = TridiagonalLUMatrix(tridiag)
-        let i0 = [1.0,0.0,0.0,0.0,0.0]
-        let i1 = [0.0,1.0,0.0,0.0,0.0]
-        let i2 = [0.0,0.0,1.0,0.0,0.0]
-        let i3 = [0.0,0.0,0.0,1.0,0.0]
-        let i4 = [0.0,0.0,0.0,0.0,1.0]
+        let i0 = [one,0,0,0,0]
+        let i1 = [0,one,0,0,0]
+        let i2 = [0,0,one,0,0]
+        let i3 = [0,0,0,one,0]
+        let i4 = [0,0,0,0,one]
         let x0 = tridiagLU.solve(i0)
         let x1 = tridiagLU.solve(i1)
         let x2 = tridiagLU.solve(i2)
@@ -39,6 +41,12 @@ final class TridiagonalMatrixTests: XCTestCase {
         result = e2.reduce(result) { $0 && $1.magnitude < tiny }
         result = e3.reduce(result) { $0 && $1.magnitude < tiny }
         result = e4.reduce(result) { $0 && $1.magnitude < tiny }
+        var maxError = e0.reduce(0) { max($0,$1.magnitude) }
+        maxError = e1.reduce(maxError) { max($0,$1.magnitude) }
+        maxError = e2.reduce(maxError) { max($0,$1.magnitude) }
+        maxError = e3.reduce(maxError) { max($0,$1.magnitude) }
+        maxError = e4.reduce(maxError) { max($0,$1.magnitude) }
+        print("maxError=\(maxError)")
         XCTAssertEqual(result, true)
     }
 }

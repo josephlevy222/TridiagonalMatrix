@@ -90,7 +90,7 @@ struct TridiagonalLUMatrix<T: AlgebraicField> {
                 au2.swapAt(k, i)
             }
             if k<n-1 { //for i in k+1..<el { // i is k+1 el is k+1 or k if k+1 is n-1
-                al[k] = singular && au0[k]==T.zero ? T.zero : au0[k+1]/au0[k] // fixed for singular (maybe?)
+                al[k] = singular /* && au0[k]==T.zero*/ ? au0[k+1] : au0[k+1]/au0[k] // fixed for singular (maybe?)
                 au0[k+1] = au1[k+1] - al[k] * au1[k]
                 au1[k+1] = au2[k+1] - al[k] * au2[k]
                 au2[k+1] = T.zero
