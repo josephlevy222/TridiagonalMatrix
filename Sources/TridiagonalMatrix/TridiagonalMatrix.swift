@@ -36,7 +36,7 @@ func *<T: AlgebraicField>(_ A: TridiagonalMatrix<T>, _ x: ColumnVector<T>) -> Co
     b[n-1] = A.lower[n-2]*x[n-2]+A.diagonal[n-1]*x[n-1]
     return b
 }
-
+/// implements Ax+y where A is a TridiagonalMatrix and x and y are ColumnVector types
 func aXpY<T: AlgebraicField>(A: TridiagonalMatrix<T>, x: ColumnVector<T>, y: ColumnVector<T>) -> ColumnVector<T> {
     precondition(x.count == A.size, "Invalid x vector size")
     precondition(y.count == A.size, "Invalid y vector size")
@@ -51,13 +51,14 @@ func aXpY<T: AlgebraicField>(A: TridiagonalMatrix<T>, x: ColumnVector<T>, y: Col
 }
 
 struct TridiagonalLUMatrix<T: AlgebraicField> {
-    var au0 : [T]
-    var au1 : [T]
-    var au2 : [T]
-    var al  : [T]
-    var indx : [Int]
-    var d : Bool
+    private var au0 : [T]
+    private var au1 : [T]
+    private var au2 : [T]
+    private var al  : [T]
+    private var indx : [Int]
+    private var d : Bool
     var singular : Bool
+    var smallestPivot : T.Magnitude
     init(_ A: TridiagonalMatrix<T>) {
         let n = A.size
         al = Array(repeating: T.zero, count: n)
@@ -69,7 +70,7 @@ struct TridiagonalLUMatrix<T: AlgebraicField> {
         au2 = A.upper + [0]
         au1[0] = au2[0]
         au2[0] = T.zero // completes rearrangement
-        
+        smallestPivot = au0[0].magnitude
         for k in 0..<n {
             // Find the biggest pivot and check if 0
             var au0max = au0[k].magnitude
@@ -81,16 +82,17 @@ struct TridiagonalLUMatrix<T: AlgebraicField> {
                     i = k+1
                 }
             }
+            if smallestPivot > au0max { smallestPivot = au0max }
             indx[k] = i+1
-            if au0max == 0 { singular = true; print("singular") }  // want au0[k]=tiny
+            if au0max == 0 { singular = true; print("singular") }  // want au0[k]=tinyValue
             if i != k {
-                d.toggle()
+                d.toggle() // to get sign of determinate
                 au0.swapAt(k, i)
                 au1.swapAt(k, i)
                 au2.swapAt(k, i)
             }
             if k<n-1 { //for i in k+1..<el { // i is k+1 el is k+1 or k if k+1 is n-1
-                al[k] = singular /* && au0[k]==T.zero*/ ? au0[k+1] : au0[k+1]/au0[k] // fixed for singular (maybe?)
+                al[k] = /*singular /* && au0[k]==T.zero*/ ? .zero :*/ au0[k+1]/au0[k] // fixed for singular (maybe?)
                 au0[k+1] = au1[k+1] - al[k] * au1[k]
                 au1[k+1] = au2[k+1] - al[k] * au2[k]
                 au2[k+1] = T.zero
@@ -118,5 +120,14 @@ struct TridiagonalLUMatrix<T: AlgebraicField> {
         var x = b
         solveInPlace(&x)
         return x
+    }
+    
+    func determinate() -> T {
+        var det = T(exactly: 1)!
+        if !d { det = -det}
+        for i in 0..<au0.count {
+            det *= au0[i]
+        }
+        return det
     }
 }

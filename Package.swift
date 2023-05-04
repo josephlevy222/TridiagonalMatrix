@@ -24,6 +24,6 @@ let package = Package(
             dependencies: [.product(name: "Numerics", package: "swift-numerics")]),
         .testTarget(
             name: "TridiagonalMatrixTests",
-            dependencies: ["TridiagonalMatrix"]),
+            dependencies: ["TridiagonalMatrix",.product(name: "Numerics", package: "swift-numerics")]),
     ]
 )
