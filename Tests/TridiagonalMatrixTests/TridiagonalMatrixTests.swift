@@ -21,7 +21,7 @@ final class TridiagonalMatrixTests: XCTestCase {
         let tridiag = TridiagonalMatrix(diagonal: diagonal, upper: upper, lower: lower)
         let tridiagLU = TridiagonalLUMatrix(tridiag)
         let i = [ [one,0,0,0,0],
-                  [0,one,0,0,0],
+                  [0,one,0,0,0], 
                   [0,0,one,0,0],
                   [0,0,0,one,0],
                   [0,0,0,0,one] ]

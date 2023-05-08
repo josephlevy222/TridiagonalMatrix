@@ -76,7 +76,7 @@ struct TridiagonalLUMatrix<T: RealOrComplex > where T.Magnitude : Real {
         singular = false
         au0 = [A.diagonal[0]] + A.lower
         au1 = A.diagonal
-        au2 = A.upper + [0]
+        au2 = A.upper + [0] 
         au1[0] = au2[0]
         au2[0] = T.zero // completes rearrangement
         let maxElement = (au0+au1+au2).map {$0.magnitude}.max()
