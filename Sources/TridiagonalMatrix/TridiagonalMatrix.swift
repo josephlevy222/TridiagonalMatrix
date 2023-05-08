@@ -8,7 +8,7 @@ import Foundation
 
 import Numerics
 typealias RealOrComplex = AlgebraicField
-
+//
 struct TridiagonalMatrix<T: RealOrComplex > {
     var lower: [T]
     var diagonal: [T]
@@ -58,7 +58,7 @@ func aXpY<T: RealOrComplex>(A: TridiagonalMatrix<T>, x: ColumnVector<T>, y: Colu
     return b
 }
 
-struct TridiagonalLUMatrix<T: RealOrComplex > {
+struct TridiagonalLUMatrix<T: RealOrComplex > where T.Magnitude : Real {
     private var au0 = [T]()
     private var au1 = [T]()
     private var au2 = [T]()
@@ -93,7 +93,7 @@ struct TridiagonalLUMatrix<T: RealOrComplex > {
                 }
             }
             if let condition = approximateConditionNumber, let a =  au0[k].reciprocal?.magnitude, condition<a { approximateConditionNumber = a }
-            indx[k] = i+1
+            indx[k] = i
             if au0max == 0 { singular = true; print("singular") }  
             if i != k {
                 d.toggle() // to get sign of determinate
@@ -115,7 +115,7 @@ struct TridiagonalLUMatrix<T: RealOrComplex > {
         let n = au0.count
         if n==0 {return}
         for k in 0..<n {
-            x.swapAt(k, indx[k]-1)
+            x.swapAt(k, indx[k])
             if k<n-1 { x[k+1] -= al[k]*x[k] }
         }
         x[n-1] = x[n-1]/au0[n-1]
