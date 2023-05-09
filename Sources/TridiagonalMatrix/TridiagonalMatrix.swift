@@ -7,8 +7,13 @@
 import Foundation
 
 import Numerics
-typealias RealOrComplex = AlgebraicField
-//
+// Set up protocol for Real and Complex<Real> types
+protocol RealOrComplex : AlgebraicField where Magnitude : Real {}
+// and enumerate types that fit it that you want to use
+extension Complex: RealOrComplex {}
+extension Float : RealOrComplex {}
+extension Double: RealOrComplex {}
+
 struct TridiagonalMatrix<T: RealOrComplex > {
     var lower: [T]
     var diagonal: [T]
@@ -25,7 +30,7 @@ struct TridiagonalMatrix<T: RealOrComplex > {
     }
 }
 
-typealias ColumnVector<T> = Array<T>
+typealias ColumnVector<T: RealOrComplex> = Array<T>
 
 func *<T: RealOrComplex>(_ A: TridiagonalMatrix<T>, _ x: ColumnVector<T>) -> ColumnVector<T> {
     precondition(x.count == A.size, "Invalid column vector size")
@@ -58,7 +63,7 @@ func aXpY<T: RealOrComplex>(A: TridiagonalMatrix<T>, x: ColumnVector<T>, y: Colu
     return b
 }
 
-struct TridiagonalLUMatrix<T: RealOrComplex > where T.Magnitude : Real {
+struct TridiagonalLUMatrix<T: RealOrComplex > {
     private var au0 = [T]()
     private var au1 = [T]()
     private var au2 = [T]()
@@ -66,7 +71,7 @@ struct TridiagonalLUMatrix<T: RealOrComplex > where T.Magnitude : Real {
     private var indx = [Int]()
     private var d : Bool = true
     var singular : Bool = false
-    var approximateConditionNumber : T.Magnitude?
+    var approximateConditionNumber : T.Magnitude = .infinity
     init(_ A: TridiagonalMatrix<T>) {
         let n = A.size
         if n==0 { return }
@@ -76,11 +81,11 @@ struct TridiagonalLUMatrix<T: RealOrComplex > where T.Magnitude : Real {
         singular = false
         au0 = [A.diagonal[0]] + A.lower
         au1 = A.diagonal
-        au2 = A.upper + [0] 
+        au2 = A.upper + [0]
         au1[0] = au2[0]
         au2[0] = T.zero // completes rearrangement
-        let maxElement = (au0+au1+au2).map {$0.magnitude}.max()
-        approximateConditionNumber = au0[0].reciprocal?.magnitude // nil if infinite
+        let maxElement = [au0,au1,au2].map {$0.map {$0.magnitude}.max()!}.max()!
+        approximateConditionNumber = au0[0].reciprocal?.magnitude ?? .infinity
         for k in 0..<n {
             // Find the biggest pivot and check if 0
             var au0max = au0[k].magnitude
@@ -92,9 +97,10 @@ struct TridiagonalLUMatrix<T: RealOrComplex > where T.Magnitude : Real {
                     i = k+1
                 }
             }
-            if let condition = approximateConditionNumber, let a =  au0[k].reciprocal?.magnitude, condition<a { approximateConditionNumber = a }
+            if let a =  au0[k].reciprocal?.magnitude,
+                approximateConditionNumber < a { approximateConditionNumber = a }
             indx[k] = i
-            if au0max == 0 { singular = true; print("singular") }  
+            if au0max == 0 { singular = true; print("singular") }
             if i != k {
                 d.toggle() // to get sign of determinate
                 au0.swapAt(k, i)
@@ -108,7 +114,7 @@ struct TridiagonalLUMatrix<T: RealOrComplex > where T.Magnitude : Real {
                 au2[k+1] = T.zero
             }
         }
-        if let condition = approximateConditionNumber, let m =  maxElement { approximateConditionNumber = condition*m }
+        approximateConditionNumber *= maxElement
     }
     
     func solveInPlace(_ x: inout ColumnVector<T>) {
