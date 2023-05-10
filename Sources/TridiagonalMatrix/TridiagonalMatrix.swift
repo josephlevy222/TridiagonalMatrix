@@ -47,7 +47,7 @@ func *<T: RealOrComplex>(_ A: TridiagonalMatrix<T>, _ x: ColumnVector<T>) -> Col
     return b
 }
 /// implements Ax+y where A is a TridiagonalMatrix and x and y are ColumnVector types
-func aXpY<T: RealOrComplex>(A: TridiagonalMatrix<T>, x: ColumnVector<T>, y: ColumnVector<T>) -> ColumnVector<T> {
+func AXpY<T: RealOrComplex>(A: TridiagonalMatrix<T>, x: ColumnVector<T>, y: ColumnVector<T>) -> ColumnVector<T> {
     precondition(x.count == A.size, "Invalid x vector size")
     precondition(y.count == A.size, "Invalid y vector size")
     let n = x.count
@@ -61,6 +61,11 @@ func aXpY<T: RealOrComplex>(A: TridiagonalMatrix<T>, x: ColumnVector<T>, y: Colu
         b[j] += A.lower[j-1]*x[j-1] + A.diagonal[j]*x[j] + A.upper[j]*x[j+1]
     }
     return b
+}
+
+func aXpY<T: RealOrComplex >(a: T , x: ColumnVector<T>, y: ColumnVector<T>) -> ColumnVector<T> {
+    precondition(x.count == y.count, "Vector size mismatchector")
+    return y + x.map { a*$0 }
 }
 
 struct TridiagonalLUMatrix<T: RealOrComplex > {
@@ -82,7 +87,7 @@ struct TridiagonalLUMatrix<T: RealOrComplex > {
         au1[0] = au2[0]
         au2[0] = T.zero // completes rearrangement
         let maxElement = [au0,au1,au2].map {$0.map {$0.magnitude}.max()!}.max()!
-        print("maxElement=\(maxElement)")
+        debugPrint("maxElement=\(maxElement)")
         approximateConditionNumber = au0[0].reciprocal?.magnitude ?? .infinity
         for k in 0..<n-1 {
             // Find the biggest pivot and check if 0
