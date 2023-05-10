@@ -36,9 +36,10 @@ func *<T: RealOrComplex>(_ A: TridiagonalMatrix<T>, _ x: ColumnVector<T>) -> Col
     precondition(x.count == A.size, "Invalid column vector size")
     let n = x.count
     var b : ColumnVector<T> = x
-    if n==0 { return [] }
-    b[0] = A.diagonal[0]*x[0]+A.upper[0]*x[1]
+    if n==0 { return [] } // Can't happen - remove
+    b[0] = A.diagonal[0]*x[0]
     if n==1 { return b }
+    b[0] += A.upper[0]*x[1]
     b[n-1] = A.lower[n-2]*x[n-2]+A.diagonal[n-1]*x[n-1]
     if n==2 { return b }
     for j in 1..<n-1 {
@@ -53,8 +54,9 @@ func AXpY<T: RealOrComplex>(A: TridiagonalMatrix<T>, x: ColumnVector<T>, y: Colu
     let n = x.count
     if n==0 { return [] }
     var b = y
-    b[0] += A.diagonal[0]*x[0]+A.upper[0]*x[1]
+    b[0] += A.diagonal[0]*x[0]
     if n==1 { return b }
+    b[0] += A.upper[0]*x[1]
     b[n-1] += A.lower[n-2]*x[n-2]+A.diagonal[n-1]*x[n-1]
     if n==2 { return b }
     for j in 1..<n-1 {
@@ -115,7 +117,8 @@ struct TridiagonalLUMatrix<T: RealOrComplex > {
             
         }
         indx[n-1] = n-1
-        if let a=au0[n-1].reciprocal?.magnitude, approximateConditionNumber < a { approximateConditionNumber = a}
+        if let a=au0[n-1].reciprocal?.magnitude,
+            approximateConditionNumber < a { approximateConditionNumber = a}
         approximateConditionNumber *= maxElement
     }
     
