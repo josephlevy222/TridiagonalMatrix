@@ -28,10 +28,9 @@ final class TridiagonalMatrixTests: XCTestCase {
         let x = i.map {icol in tridiagLU.solve(icol)}
         let ii = x.map {xcol in tridiag*xcol}
         var tolerance = T.Magnitude.ulpOfOne*2
-        if let condition = tridiagLU.approximateConditionNumber {
-            print("conditionNumber=\(condition)")
-            tolerance *= condition
-        }
+        let condition = tridiagLU.approximateConditionNumber
+        print("conditionNumber=\(condition)")
+        tolerance *= condition
         print("tolerance=\(tolerance)")
         let e = zip(i,ii).map { zip($0,$1).map { $0 - $1 } }
         let okay = e.flatMap { $0 }.reduce(true) { $0 && $1.magnitude < tolerance }
@@ -40,6 +39,6 @@ final class TridiagonalMatrixTests: XCTestCase {
         let determinate = tridiagLU.determinate()
         print("determinate=\(determinate) vs. \(det)")
         XCTAssertTrue(determinate.isApproximatelyEqual(to: det))
-        XCTAssertTrue(okay || tridiagLU.singular)
+        XCTAssertTrue(okay || tridiagLU.approximateConditionNumber.isInfinite)
     }
 }
