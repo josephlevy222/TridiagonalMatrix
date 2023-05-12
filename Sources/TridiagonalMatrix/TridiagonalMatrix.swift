@@ -8,13 +8,13 @@ import Foundation
 
 import Numerics
 // Set up protocol for Real and Complex<Real> types
-protocol RealOrComplex : AlgebraicField where Magnitude : Real {}
+public protocol RealOrComplex : AlgebraicField where Magnitude : Real {}
 // and enumerate types that fit it that you want to use
 extension Complex : RealOrComplex {}
 extension Float   : RealOrComplex {}
 extension Double  : RealOrComplex {}
 
-struct TridiagonalMatrix<T: RealOrComplex > {
+public struct TridiagonalMatrix<T: RealOrComplex > {
     var lower: [T]
     var diagonal: [T]
     var upper: [T]
@@ -30,9 +30,9 @@ struct TridiagonalMatrix<T: RealOrComplex > {
     }
 }
 
-typealias ColumnVector<T: RealOrComplex> = Array<T>
+public typealias ColumnVector<T: RealOrComplex> = Array<T>
 
-func *<T: RealOrComplex>(_ A: TridiagonalMatrix<T>, _ x: ColumnVector<T>) -> ColumnVector<T> {
+public func *<T: RealOrComplex>(_ A: TridiagonalMatrix<T>, _ x: ColumnVector<T>) -> ColumnVector<T> {
     precondition(x.count == A.size, "Invalid column vector size")
     let n = x.count
     var b : ColumnVector<T> = x
@@ -48,7 +48,7 @@ func *<T: RealOrComplex>(_ A: TridiagonalMatrix<T>, _ x: ColumnVector<T>) -> Col
     return b
 }
 /// implements Ax+y where A is a TridiagonalMatrix and x and y are ColumnVector types
-func AXpY<T: RealOrComplex>(A: TridiagonalMatrix<T>, x: ColumnVector<T>, y: ColumnVector<T>) -> ColumnVector<T> {
+public func AXpY<T: RealOrComplex>(A: TridiagonalMatrix<T>, x: ColumnVector<T>, y: ColumnVector<T>) -> ColumnVector<T> {
     precondition(x.count == A.size, "Invalid x vector size")
     precondition(y.count == A.size, "Invalid y vector size")
     let n = x.count
@@ -65,12 +65,12 @@ func AXpY<T: RealOrComplex>(A: TridiagonalMatrix<T>, x: ColumnVector<T>, y: Colu
     return b
 }
 
-func aXpY<T: RealOrComplex >(a: T , x: ColumnVector<T>, y: ColumnVector<T>) -> ColumnVector<T> {
+public func aXpY<T: RealOrComplex >(a: T , x: ColumnVector<T>, y: ColumnVector<T>) -> ColumnVector<T> {
     precondition(x.count == y.count, "Vector size mismatchector")
     return y + x.map { a*$0 }
 }
 
-struct TridiagonalLUMatrix<T: RealOrComplex > {
+public struct TridiagonalLUMatrix<T: RealOrComplex > {
     private var au0 = [T]()
     private var au1 = [T]()
     private var au2 = [T]()
