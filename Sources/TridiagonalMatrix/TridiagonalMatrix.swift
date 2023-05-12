@@ -15,9 +15,9 @@ extension Float   : RealOrComplex {}
 extension Double  : RealOrComplex {}
 
 public struct TridiagonalMatrix<T: RealOrComplex > {
-    var lower: [T]
-    var diagonal: [T]
-    var upper: [T]
+    public var lower: [T]
+    public var diagonal: [T]
+    public var upper: [T]
     let size: Int
     init(diagonal: [T], upper: [T], lower: [T]) {
         precondition(diagonal.count > 0, "Diagonal must not be empty")
